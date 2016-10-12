@@ -1,0 +1,38 @@
+Looking through the traffic, we find some tcp packets which seem to indicate that the user went to pastebin.com. One of the urls is
+http://pastebin.com/DQ8yiYcQ, which contains a list of .onion sites.
+
+Using curl and tor, we can quickly check to see which sites are valid.
+We can configure curl to use tor by adding the following line to ~/.curlrc:
+proxy = socks5h://127.0.0.1:9050
+
+Turns out the correct url is https://vrpexywsisp5izxx.onion
+
+By curling the site, we see that the page seems to be loaded by javascript, from /js/script.js:
+...
+{title: 'all', category: ''},
+{title: 'cats', category: 'cat'},
+{title: 'mild dank', category: 'mild'},
+{title: 'medium dank', category: 'medium'},
+{title: 'pure dank', category: 'pure'},
+{title: 'top5', category: 'top5'},
+{title: 'harambe', category: 'gorilla'},
+{title: 'l337hax', category: 'hax'},
+{title: 'lorem ipsum', category: 'lorem'},
+//{title: 'admin', category: '/admin.html'},
+...
+
+If we visit admin.html, we get the flag:
+$ curl vrpexywsisp5izxx.onion/admin.html
+
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="/css/style.css">
+</head>
+<body>
+<div class="stahp-looking">key: there-are-no-dank-memes-like-neal-memes</div>
+</body>
+</html>
+
+there-are-no-dank-memes-like-neal-memes

@@ -1,0 +1,4 @@
+Running `exiftool` on the image, we see that the 'Author' is
+flag{d0nt_r3p_fr0m_c4n4l_str33t}
+
+Flag: d0nt_r3p_fr0m_c4n4l_str33t

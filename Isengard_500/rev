@@ -1,0 +1,30 @@
+//not entrypoint
+func1():
+    for i in 0..37:
+        func2()
+    x = 1
+    for i in 0..37:
+        x &&= arr1[i] == arr2[i]
+    if x:
+        print "success"
+    else:
+        print "woaw"
+
+pos = 0
+func2():
+    in = get 2 bytes
+    if pos:
+        c = func3(arr1[pos], in, 1)
+    else:
+        c = func3(0, in, 1)
+    arr1[pos++] = c
+
+func3(a,b,c):
+    i = ~a
+    while (--c)
+    {
+        v3 = b++;
+        i = (i>>8) ^ arr2[i ^ *v3]
+    }
+    return ~i
+    //effectively return a when c=1?

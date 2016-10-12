@@ -1,0 +1,16 @@
+After extracting the zip archive, we can start analzing the memory dump.
+
+$ volatility -f phishing.vemv imageinfo
+
+We find that the profile we need to analyze is Win7SP0x86.
+We can look at the running processes by running:
+
+$ volatility -f phishing.vemv --profile Win7SP0x86 pslist
+
+Since this unknown file was downloaded from a link, we should inspect the firefox process, with pid 2144
+
+$ volatility -f phishing.vemv --profile Win7SP0x86 memdump -p 2144 --dump-dir .
+$ strings 2144.dmp | grep http > firefox
+
+Looking through the links, we find a dropbox one, which happened to be the flag:
+https://dl.dropboxusercontent.com/content_link/LS6nAF3whdbfO1suJGqHkx6mVkrqW8uhLkLUegnS38igQo3jDM9SHaDnmHAxsEEG/file?dl=1

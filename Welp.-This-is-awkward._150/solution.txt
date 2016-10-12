@@ -1,0 +1,9 @@
+Looking through the PDF, we find the following object:
+
+\141\160\160\056\141\154\145\162\164\050\042\106\114\101\107\040\100\157\125\170\165\116\127\070\147\061\172\170\042\054\063\051\073
+
+Using an online decoder (or we could do it in python), we can decode the object:
+http://ddecode.com/hexdecoder/?results=1e0751bc01db12f396d243b15c83039e
+app.alert("FLAG @oUxuNW8g1zx",3);
+
+@oUxuNW8g1zx

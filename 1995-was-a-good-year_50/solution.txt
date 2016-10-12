@@ -1,0 +1,10 @@
+"Handles become a hacker’s identity when they’re online. What is Emmanuel Goldstein’s?"
+
+Googling "Emmanuel Goldstein", we see a wikipedia article about the
+chatacter in Orwell's 1984. In the "Others" section it mentions a 1995
+film "Hackers" which contained a character with that name.
+
+Going to the wikipedia entry of "Hackers" and ctrl-f'ing "Emmanuel", we get:
+Emmanuel "Cereal Killer" Goldstein
+
+Flag: Cereal Killer

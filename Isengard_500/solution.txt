@@ -1,0 +1,176 @@
+We are given a file "isengard".
+Running it, we're given a prompt for a password and told what it is.
+Entering "youshallnotpass" results in seemingly nothing happening.
+
+Running "strings" on the binary reveals this curious string:
+"Could not open interpreter %s (%d), mismatch 32/64 bits ?"
+Googling that leads us to midgetpack, a packer that has two modes:
+password and Curve25519. It appears to have been used in password mode,
+but we can see remnants of code for Curve22519 when trying to
+disassemble it. To verify it's in password mode, I downloaded midgetpack
+and ran it on a simple program in password mode to see whether Curve25519
+remnants existed, and they did.
+
+Since the binary is packed, we can't reverse it like we normally would.
+The packer unpacks the program once you input the password, so if we can
+dump the program's memory, we can see the un-packed code (from the .text
+section).
+
+James found some code on StackOverflow to do this:
+http://stackoverflow.com/a/23001686
+We can now run isengard, input the password, then dump the memory.
+
+Opening up the dump in IDA, we can see some strings like "woaw"
+and "great".
+
+I saw "woaw" before when running
+    $ echo "youshallnotpass" | ./isengard
+The function call right after
+    push    offset aWoaw    ; "woaw"
+is thus probably something to print.
+
+Reading the rest of the function, we can reverse it to something like this:
+func1(): //0x080486E7
+    for i in 0..37:
+        call 0x804862A
+    x = 1
+    for i in 0..37:
+        x &&= arr1[i] == arr2[i]
+    if x:
+        print "great"
+    else:
+        print "woaw"
+
+It looks like we need to make arr1 (804A520) equal to arr2 (804A460).
+IDA is unable to show any value for arr1, but arr2 is filled.
+
+Reversing the function at 0x804862A, we get something like this:
+func2(): //0x0804862A
+    in = read 2 bytes //guess
+    if pos:
+        c = 0x804855B(arr1[pos], in, 1)
+    else:
+        c = 0x804855B(0, in, 1)
+    arr1[pos++] = c
+
+The function at 0x804855B is much more complicated, but came with even lower
+reward:
+
+func3(a,b,c): //0x0804855B
+    i = ~a
+    while (--c)
+    {
+        v3 = b++
+        i = (i >> 8) ^ arr2[i ^ *v3]
+    }
+    return ~i
+
+In func2, both calls to func3 have c=1, which means func3 returns ~~a == a.
+None of this makes any sense, so we scrap this and try debugging.
+
+It we attempt to use gdb or strace, we get "Rip fam" and the program closes.
+I couldn't find "Rip fam" in the dump, but James could and pointed me to
+0x080485C5.
+
+Right after pushing the "Rip Fam" address, it calls what is presumably
+another print function. After that, it pushes 0xDEAD to stack then
+calls another function.
+
+Running strace, the last thing we get before closing is exit_group(57005).
+0xDEAD = 57005, so we can mark that function as "exit_group".
+
+Right before it prints "Rip Fam", there is a function call with
+4 arguments, all 0. If the result is -1, we print "Rip Fam" and close. If
+it's not -1, we continue.
+
+Looking at strace, we find the function that returns -1: ptrace.
+Googling "ptrace anti-debug", we're lead to various sites telling us
+that ptrace returns -1 if something is already tracing the program
+(which indicates it is being debugged/straced).
+
+We find http://reverseengineering.stackexchange.com/questions/1930/detecting-tracing-in-linux
+The accepted answer comforts us by saying it's not hard to break this
+(example) code, and gives us 2 ways: NOP out the ptrace call, and
+call our own ptrace() with LD_PRELOAD.
+
+NOPing out ptrace isn't an option as the binary is packed. I tried to
+play around with it by patching out various syscalls that were present,
+but ultimately nothing worked as intended.
+
+Looking into LD_PRELOAD, we find how we can fool the ptrace() check.
+The code is in faketrace.c, and it is compiled as such:
+    $ gcc -shared -fPIC faketrace.c -o faketrace.so -m32
+We can then use this by running strace or gdb like such:
+    $ env LD_PRELOAD=./faketrace.so gdb ./isengard
+
+This way we can debug the program freely.
+
+We open it in gdb, input the password, Ctrl-Z, then break somewhere in
+func1 (shown above and in file "rev").
+
+    Password: <we input "youshallnotpass" here>
+    ^Z
+    Program received signal SIGTSTP, Stopped (user).
+    0xf7ffbd80 in __kernel_vsyscall ()
+    (gdb) b *0x0804873C
+    Breakpoint 1 at 0x804873c
+    (gdb) c
+    Continuing.
+
+    Program received signal SIGTSTP, Stopped (user).
+    0xf7ffbd80 in __kernel_vsyscall ()
+    (gdb) c
+    Continuing.
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+    Breakpoint 1, 0x0804873c in ?? ()
+
+We input 37*2 (=74) a's as read() is called 37 times and takes 2 bytes
+every time.
+
+We can now print the arrays, which are likely 37 elements long, with each
+element being 4 bytes:
+
+    (gdb) x/37x 0x804A520
+    0x804a520:	0xe8b7be43	0x5976a4d4	0x5976a4d4	0x5976a4d4
+    0x804a530:	0x5976a4d4	0x5976a4d4	0x5976a4d4	0x5976a4d4
+    0x804a540:	0x5976a4d4	0x5976a4d4	0x5976a4d4	0x5976a4d4
+    0x804a550:	0x5976a4d4	0x5976a4d4	0x5976a4d4	0x5976a4d4
+    0x804a560:	0x5976a4d4	0x5976a4d4	0x5976a4d4	0x5976a4d4
+    0x804a570:	0x5976a4d4	0x5976a4d4	0x5976a4d4	0x5976a4d4
+    0x804a580:	0x5976a4d4	0x5976a4d4	0x5976a4d4	0x5976a4d4
+    0x804a590:	0x5976a4d4	0x5976a4d4	0x5976a4d4	0x5976a4d4
+    0x804a5a0:	0x5976a4d4	0x5976a4d4	0x5976a4d4	0x5976a4d4
+    0x804a5b0:	0x5976a4d4
+    (gdb) x/37x 0x804A460
+    0x804a460:	0x76d32be0	0x27c7d869	0x5976a4d4	0xb01501e1
+    0x804a470:	0xa4145dae	0xbece89d3	0x20aa1c70	0x9817b97f
+    0x804a480:	0x50c0e8ff	0x5976a4d4	0xc9c9b945	0x9817b97f
+    0x804a490:	0xaacfd59c	0x43ac70a9	0xb778c5f8	0x20aa1c70
+    0x804a4a0:	0x9817b97f	0x50c0e8ff	0x5976a4d4	0xc9c9b945
+    0x804a4b0:	0x4a1a3c82	0x9817b97f	0x5976a4d4	0xc9c9b945
+    0x804a4c0:	0x34ab403f	0xdc13940c	0x9817b97f	0x291c505b
+    0x804a4d0:	0x451ac5b6	0x451ac5b6	0xc07ff56e	0x451ac5b6
+    0x804a4e0:	0x451ac5b6	0xb01501e1	0x5e1b60cd	0xddc8e50a
+    0x804a4f0:	0xaacfd59c
+
+The second array is fixed, but our input modifies the first array.
+I do not know how, and it doesn't matter if we can map 1 char <-> 4 bytes.
+Luckily we can, so we can build a list of each character and its resultant
+4 bytes. However, the first 4 bytes seem messed up. This is likely due to
+the code in func2 setting arr1[pos] = 0.
+
+Using gen_strs.py, we feed it every alphabetical character, numbers,
+and common symbols in flags: "_{}".
+We feed a character+newline, as that appers to be the intention.
+
+Using that, we can construct a dictionary mapping characters to their
+result, and use the reverse of that to find what the input would have to be
+for arr1 to equal arr2. The code is in solve.py.
+
+$ python solve.py
+?lag{oh_man_such_many_ant3_d00b00gers
+
+We can guess "?" is "f", and there's a "}" at the end.
+
+Flag: flag{oh_man_such_many_ant3_d00b00gers}

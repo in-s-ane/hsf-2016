@@ -1,0 +1,38 @@
+Using peepdf (see https://github.com/jesparza/peepdf), we can analyze the pdf given to us and extract objects from it
+
+$ peepdf -i biotech-workfoce.pdf
+
+File: biotech-workfoce.pdf
+MD5: 90ea57b332f857b8630a3d1772942a12
+SHA1: 7bb536c11f711f86d14621bb1bb44039e678e604
+SHA256: 3f63e2725606c501fef8d4a778c5cab9ae4cb18c0257c6cec6d036ae3bfa9909
+Size: 20062 bytes
+Version: 1.4
+Binary: True
+Linearized: False
+Encrypted: False
+Updates: 0
+Objects: 12
+Streams: 3
+URIs: 0
+Comments: 0
+Errors: 0
+
+Version 0:
+	Catalog: 10
+	Info: 11
+	Objects (12): [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+	Streams (3): [4, 12, 2]
+		Encoded (3): [4, 12, 2]
+	Suspicious elements:
+		/OpenAction (1): [10]
+
+> object 12
+
+<< /Length 30
+/Filter /ASCIIHexDecode >>
+stream
+This is your FLAG fo@4AhAA$SZk
+endstream
+
+The flag is fo@4AhAA$SZk

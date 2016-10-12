@@ -1,0 +1,19 @@
+Plugging the ciphertext into quipiuq, we get the following as a possible decryption:
+sas ssarwing situ redcoats so secrecy sas tattawosnt
+
+A little bit of guesswork gives us the following:
+was swarming with redcoats so secrecy was tantamount
+
+A little bit of recon gives us the following link:
+http://www.mountvernon.org/digital-encyclopedia/article/culper-spy-ring/
+
+More specifically, the following passage:
+In order to safeguard the identity of his spies, Tallmadge utilized a number of protective measures.
+Tallmadge gave his informants pseudonyms and invented a numerical substitution system to identify
+his informants rather than use names. Seven hundred and sixty-three numbers were used, with 711
+denoting General Washington, 745 representing England, and 727 for New York. Tallmadge and his associates also wrote in invisible ink.
+
+Thus, the flag is:
+New York was swarming with redcoats so secrecy was tantamount
+
+P.S: How is this trivia?

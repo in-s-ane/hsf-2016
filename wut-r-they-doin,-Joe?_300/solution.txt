@@ -1,0 +1,10 @@
+After extracting the zip archive, we get a windows xp memory dump.
+
+Since we are looking for a file called "r.exe", let's grep the memory dump for that file.
+$ strings WinXPSP3x86.mem | grep -F '\r.exe'
+
+c:\windows\system32\1076\r.exe a -r -hps0methingcl3av0r ev.rar desktop\evidence\logs
+c:\windows\system32\1076\r.exe a -r -hps0methingcl3av0r ev.rar desktop\evidence\logs
+c:\windows\system32\1076\r.exe a -r -hps0methingcl3av0r ev.rar desktop\evidence\logs
+
+c:\windows\system32\1076\r.exe

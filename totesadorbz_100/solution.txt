@@ -1,0 +1,8 @@
+Somehow you are supposed to know that you need to use steghide to extract data from the image, and that the password is "totesadorbz".
+
+$ steghide extract -sf hedgehog.jpg -p totesadorbz
+wrote extracted data to "totesadorbz.txt".
+$ cat totesadorbz.txt
+flag{H3dgeh0gsAreLikeS00perCute}
+
+Remove the flag{}, and get H3dgeh0gsAreLikeS00perCute

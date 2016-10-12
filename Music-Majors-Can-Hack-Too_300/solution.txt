@@ -1,0 +1,5 @@
+Opening up the file in audacity, we can look at its spectrogram form and view the flag.
+
+Remove the flag{}, and you get alex_really_loves_audio
+
+P.S: Why was this worth 300 points?
